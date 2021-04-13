@@ -20,8 +20,15 @@ namespace RemoteXilUpdate
         private void RegistersInit_SIPMZynq()
         {
             int num;
+            uint ch_num = 32;
+            uint adc_reg;
+            uint adc_offset = 0x80000;
 
-			////**************************** ADC Config *********************************//
+            //*********** Пороги ***********//
+            uint thrL = 2148;
+            uint thrH = 2158;
+            
+            ////**************************** ADC Config *********************************//
 			num = XilWriteReg(0x200018, 0x2810); // пишем во все АЦП одновременно (Reg 0x28)
             num = XilWriteReg(0x20001A, 0x8100); // Bit-wise
             Thread.Sleep(10);
@@ -29,68 +36,59 @@ namespace RemoteXilUpdate
             num = XilWriteReg(0x20001A, 0x8201); // Enable Reg, 12 bit, two-wire
 			Thread.Sleep(10);
             num = XilWriteReg(0x200018, 0x4210); // пишем во все АЦП одновременно (Reg 0x42)
-            num = XilWriteReg(0x20001A, 0x8000); // LCLK Phase
+            num = XilWriteReg(0x20001A, 0x8060); // LCLK Phase
             Thread.Sleep(10);
+            //num = XilWriteReg(0x200018, 0xBE10); // пишем во все АЦП одновременно (Reg 0xBE)
+            //num = XilWriteReg(0x20001A, 0x80E7); // LVDS Delay
+            //Thread.Sleep(10);
 
-            num = XilWriteReg(0x200028, 0x1);   // 50 MHz (0 - 100MHz, 1 - 50 MHz, 2 - 33 MHz, 3 - 25 MHz, 4 - 20 MHz)
+            num = XilWriteReg(0x200028, 0x0);   // 50 MHz (0 - 100MHz, 1 - 50 MHz, 2 - 33 MHz, 3 - 25 MHz, 4 - 20 MHz)
 			////************************************************************************//
 
+            for (uint i = 0; i < ch_num; i++)
+            {
+                adc_reg = (i << 12) | adc_offset;
+                if (i <12) num = XilWriteReg(adc_reg + 0x0, 0); // Request Disable = 0
+                else num = XilWriteReg(adc_reg + 0x0, 4); // Request Disable = 1
+                num = XilWriteReg(adc_reg + 0x28, 0); // Сглаживание
+                num = XilWriteReg(adc_reg + 0x40, 8); // Data Offset
+                num = XilWriteReg(adc_reg + 0x44, 2048); // Data Length
+                num = XilWriteReg(adc_reg + 0xE, 512); // Stop Delay
+                num = XilWriteReg(adc_reg + 0x10, thrL); // Threshold L
+                num = XilWriteReg(adc_reg + 0x20, thrH); // Threshold H
+            }
 
-            num = XilWriteReg(0x90028, 0); // Сглаживание Channel 0
-            num = XilWriteReg(0x98028, 0); // Сглаживание Channel 2
+            ////*********** Смещение данных ***********//
+            //num = XilWriteReg(0x90040, 0); // Data Offset Channel 0
+            //num = XilWriteReg(0x90042, 0); // Data Offset Channel 1
+            //num = XilWriteReg(0x98040, 0); // Data Offset Channel 2
+            //num = XilWriteReg(0x98042, 0); // Data Offset Channel 3
 
-            num = XilWriteReg(0xb0028, 0); // Сглаживание Channel 4
-            num = XilWriteReg(0xb8028, 0); // Сглаживание Channel 6
+            //num = XilWriteReg(0xb0040, 0); // Data Offset Channel 4
+            //num = XilWriteReg(0xb0042, 0); // Data Offset Channel 5
+            //num = XilWriteReg(0xb8040, 0); // Data Offset Channel 6
+            //num = XilWriteReg(0xb8042, 0); // Data Offset Channel 7
 
-            num = XilWriteReg(0xd0028, 0); // Сглаживание Channel 8
-            num = XilWriteReg(0xd8028, 0); // Сглаживание Channel A
+            //num = XilWriteReg(0xd0040, 0); // Data Offset Channel 8
+            //num = XilWriteReg(0xd0042, 0); // Data Offset Channel 9
+            //num = XilWriteReg(0xd8040, 0); // Data Offset Channel A
+            //num = XilWriteReg(0xd8042, 0); // Data Offset Channel B
 
-            //*********** Смещение данных ***********//
-            num = XilWriteReg(0x90040, 0); // Data Offset Channel 0
-            num = XilWriteReg(0x90042, 0); // Data Offset Channel 1
-            num = XilWriteReg(0x98040, 0); // Data Offset Channel 2
-            num = XilWriteReg(0x98042, 0); // Data Offset Channel 3
+            ////*********** Длина данных ***********//
+            //num = XilWriteReg(0x90044, 2048); // Data Length Channel 0
+            //num = XilWriteReg(0x90046, 2048); // Data Length Channel 1
+            //num = XilWriteReg(0x98044, 2048); // Data Length Channel 2
+            //num = XilWriteReg(0x98046, 2048); // Data Length Channel 3
 
-            num = XilWriteReg(0xb0040, 0); // Data Offset Channel 4
-            num = XilWriteReg(0xb0042, 0); // Data Offset Channel 5
-            num = XilWriteReg(0xb8040, 0); // Data Offset Channel 6
-            num = XilWriteReg(0xb8042, 0); // Data Offset Channel 7
+            //num = XilWriteReg(0xb0044, 2048); // Data Length Channel 4
+            //num = XilWriteReg(0xb0046, 2048); // Data Length Channel 5
+            //num = XilWriteReg(0xb8044, 2048); // Data Length Channel 6
+            //num = XilWriteReg(0xb8046, 2048); // Data Length Channel 7
 
-            num = XilWriteReg(0xd0040, 0); // Data Offset Channel 8
-            num = XilWriteReg(0xd0042, 0); // Data Offset Channel 9
-            num = XilWriteReg(0xd8040, 0); // Data Offset Channel A
-            num = XilWriteReg(0xd8042, 0); // Data Offset Channel B
-
-            //*********** Длина данных ***********//
-            //num = XilWriteReg(0x90044, 4); // Data Length Channel 0
-            //num = XilWriteReg(0x90046, 4); // Data Length Channel 1
-            //num = XilWriteReg(0x98044, 4); // Data Length Channel 2
-            //num = XilWriteReg(0x98046, 4); // Data Length Channel 3
-
-            //num = XilWriteReg(0xb0044, 4); // Data Length Channel 4
-            //num = XilWriteReg(0xb0046, 4); // Data Length Channel 5
-            //num = XilWriteReg(0xb8044, 4); // Data Length Channel 6
-            //num = XilWriteReg(0xb8046, 4); // Data Length Channel 7
-
-            //num = XilWriteReg(0xd0044, 4); // Data Length Channel 8
-            //num = XilWriteReg(0xd0046, 4); // Data Length Channel 9
-            //num = XilWriteReg(0xd8044, 4); // Data Length Channel A
-            //num = XilWriteReg(0xd8046, 4); // Data Length Channel B
-
-            num = XilWriteReg(0x90044, 2048); // Data Length Channel 0
-            num = XilWriteReg(0x90046, 2048); // Data Length Channel 1
-            num = XilWriteReg(0x98044, 2048); // Data Length Channel 2
-            num = XilWriteReg(0x98046, 2048); // Data Length Channel 3
-
-            num = XilWriteReg(0xb0044, 2048); // Data Length Channel 4
-            num = XilWriteReg(0xb0046, 2048); // Data Length Channel 5
-            num = XilWriteReg(0xb8044, 2048); // Data Length Channel 6
-            num = XilWriteReg(0xb8046, 2048); // Data Length Channel 7
-
-            num = XilWriteReg(0xd0044, 2048); // Data Length Channel 8
-            num = XilWriteReg(0xd0046, 2048); // Data Length Channel 9
-            num = XilWriteReg(0xd8044, 2048); // Data Length Channel A
-            num = XilWriteReg(0xd8046, 2048); // Data Length Channel B
+            //num = XilWriteReg(0xd0044, 2048); // Data Length Channel 8
+            //num = XilWriteReg(0xd0046, 2048); // Data Length Channel 9
+            //num = XilWriteReg(0xd8044, 2048); // Data Length Channel A
+            //num = XilWriteReg(0xd8046, 2048); // Data Length Channel B
 
 			//num = XilWriteReg(0x9000e, 100); // Stop Delay
 			//num = XilWriteReg(0x9800e, 100); // Stop Delay
@@ -106,43 +104,43 @@ namespace RemoteXilUpdate
 			//num = XilWriteReg(0xd000e, 0); // Stop Delay
 			//num = XilWriteReg(0xd800e, 0); // Stop Delay
 
-			//*********** Пороги ***********//
-            uint thrL = 2148;
-            uint thrH = 2158;
+            ////*********** Пороги ***********//
+            //uint thrL = 2148;
+            //uint thrH = 2158;
 
-			num = XilWriteReg(0x90010, thrL); // Threshold 0 L
-			num = XilWriteReg(0x90014, thrL); // Threshold 1 L
-			num = XilWriteReg(0x90020, thrH); // Threshold 0 H
-			num = XilWriteReg(0x90024, thrH); // Threshold 1 H
-			num = XilWriteReg(0x98010, thrL); // Threshold 2 L
-			num = XilWriteReg(0x98014, thrL); // Threshold 3 L
-			num = XilWriteReg(0x98020, thrH); // Threshold 2 H
-			num = XilWriteReg(0x98024, thrH); // Threshold 3 H
+            //num = XilWriteReg(0x90010, thrL); // Threshold 0 L
+            //num = XilWriteReg(0x90014, thrL); // Threshold 1 L
+            //num = XilWriteReg(0x90020, thrH); // Threshold 0 H
+            //num = XilWriteReg(0x90024, thrH); // Threshold 1 H
+            //num = XilWriteReg(0x98010, thrL); // Threshold 2 L
+            //num = XilWriteReg(0x98014, thrL); // Threshold 3 L
+            //num = XilWriteReg(0x98020, thrH); // Threshold 2 H
+            //num = XilWriteReg(0x98024, thrH); // Threshold 3 H
 
-			num = XilWriteReg(0xb0010, thrL); // Threshold 4 L
-			num = XilWriteReg(0xb0014, thrL); // Threshold 5 L
-			num = XilWriteReg(0xb0020, thrH); // Threshold 4 H
-			num = XilWriteReg(0xb0024, thrH); // Threshold 5 H
-			num = XilWriteReg(0xb8010, thrL); // Threshold 6 L
-			num = XilWriteReg(0xb8014, thrL); // Threshold 7 L
-			num = XilWriteReg(0xb8020, thrH); // Threshold 6 H
-			num = XilWriteReg(0xb8024, thrH); // Threshold 7 H
+            //num = XilWriteReg(0xb0010, thrL); // Threshold 4 L
+            //num = XilWriteReg(0xb0014, thrL); // Threshold 5 L
+            //num = XilWriteReg(0xb0020, thrH); // Threshold 4 H
+            //num = XilWriteReg(0xb0024, thrH); // Threshold 5 H
+            //num = XilWriteReg(0xb8010, thrL); // Threshold 6 L
+            //num = XilWriteReg(0xb8014, thrL); // Threshold 7 L
+            //num = XilWriteReg(0xb8020, thrH); // Threshold 6 H
+            //num = XilWriteReg(0xb8024, thrH); // Threshold 7 H
 
-			num = XilWriteReg(0xd0010, thrL); // Threshold 8 L
-			num = XilWriteReg(0xd0014, thrL); // Threshold 9 L
-			num = XilWriteReg(0xd0020, thrH); // Threshold 8 H
-			num = XilWriteReg(0xd0024, thrH); // Threshold 9 H
-			num = XilWriteReg(0xd8010, thrL); // Threshold A L
-			num = XilWriteReg(0xd8014, thrL); // Threshold B L
-			num = XilWriteReg(0xd8020, thrH); // Threshold A H
-			num = XilWriteReg(0xd8024, thrH); // Threshold B H
-            //***********************//
+            //num = XilWriteReg(0xd0010, thrL); // Threshold 8 L
+            //num = XilWriteReg(0xd0014, thrL); // Threshold 9 L
+            //num = XilWriteReg(0xd0020, thrH); // Threshold 8 H
+            //num = XilWriteReg(0xd0024, thrH); // Threshold 9 H
+            //num = XilWriteReg(0xd8010, thrL); // Threshold A L
+            //num = XilWriteReg(0xd8014, thrL); // Threshold B L
+            //num = XilWriteReg(0xd8020, thrH); // Threshold A H
+            //num = XilWriteReg(0xd8024, thrH); // Threshold B H
+            ////***********************//
 
-			//num = XilWriteReg(0x20000C, 0xffff); //маска каналов
-			//num = XilWriteReg(0x20000D, 0xffff); //маска каналов
-
-			num = XilWriteReg(0x20000C, 0x80); //маска каналов
+			num = XilWriteReg(0x20000C, 0xfff); //маска каналов
 			num = XilWriteReg(0x20000D, 0x0); //маска каналов
+
+            //num = XilWriteReg(0x20000C, 0x80); //маска каналов
+            //num = XilWriteReg(0x20000D, 0x0); //маска каналов
 
             //num = XilWriteReg(0x200006, 0x101); // кратность совпадений и внешнее подтверждение
             //			num = XilWriteReg(0x200006, 0x301); // кратность совпадений и OPTICAL подтверждение
