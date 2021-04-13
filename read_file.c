@@ -19,6 +19,23 @@ unsigned int read_4_bytes(FILE * fdata)
     return Conv.tInt;
 }
 
+char* read_8_bytes(FILE * fdata)
+{
+    char buf[8] = {0};
+    int i;
+    char * xx;
+
+    Conv.tInt = read_4_bytes(fdata);
+    for(i = 0; i < 4; i++)
+        buf[i] = Conv.tChar[i];
+    Conv.tInt = read_4_bytes(fdata);
+    for(i = 0; i < 4; i++)
+        buf[i + 4] = Conv.tChar[i];
+    for(i = 0; i < 8; i++)
+        printf("0x%x ", buf[i]);
+    return xx;
+}
+
 int main()
 {
     FILE *fdata;
@@ -46,6 +63,7 @@ int main()
     printf("trigger = %u = 0x%x\n", inw, inw);
     // read time
     //read_time(fdata);
+    read_8_bytes(fdata);
     // read reserve
     inw = read_4_bytes(fdata);
     printf("reserve = %u = 0x%x\n", inw, inw);
