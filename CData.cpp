@@ -29,9 +29,9 @@ public:
             for(int t = 0; t < times; t++)
                 event[chan][t] = 0;
     }
-    void read_header();
-    void print_header(FILE *fout);
+    int  read_header();
     int  read_event();
+    void print_header(FILE *fout);
     void print_event(FILE *fout);
 
 private:
@@ -47,7 +47,7 @@ private:
 
 //====================================================================
 /// read datafile header - 24 bytes
-void CData::read_header()
+int CData::read_header()
 {
     // read identificator == 3032
     id = read_2_bytes();
@@ -62,6 +62,7 @@ void CData::read_header()
     read_time();
     // read reserve
     reserve = read_4_bytes();
+    return 0;
 }
 
 void CData::print_header(FILE *fout)
@@ -94,6 +95,8 @@ void CData::check_event()
 }
 
 
+
+
 int CData::read_event()
 {
     for(int chan = 0; chan < chans; chan++)
@@ -107,6 +110,7 @@ int CData::read_event()
         if(Debug) printf("Event read OK!\n");
         return 0; // OK
     }
+    if(Debug) printf("read_event(): Event read ERROR!\n");
     return 1; // error
 }
 
