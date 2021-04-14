@@ -1,1 +1,1 @@
-g++ -I/usr/include/ -Wall read_file.c -o read_file
+g++ -I/usr/include/ -Wall main.cpp -o read_file
