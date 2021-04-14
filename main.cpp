@@ -1,7 +1,7 @@
 #include <stdio.h>
 #define DEBUG
 
-const int Debug = 0;
+const int Debug = 1;
 
 union CharInt_converter
 {
@@ -15,7 +15,9 @@ union CharInt_converter
 int main()
 {
     FILE *fdata;
+    FILE *fout;
     char name[200] = "./data/SIPMZynq_v1_192.168.1.200.bin";
+    char nameout[200] = "SIPMZynq_v1_192.168.1.200.txt";
     //unsigned int  inw;
 
     if((fdata = fopen(name, "rb")) == NULL)
@@ -23,13 +25,21 @@ int main()
         printf("Error in file %s opening!\n\n", name);
         return 1;
     }
+    if((fout = fopen(nameout, "wt")) == NULL)
+    {
+        printf("Error in file %s opening!\n\n", nameout);
+        return 2;
+    }
+
 
     CData data(fdata);
 
     data.read_header();
     data.print_header(stdout);
-    data.get_event();
-    data.print_event(stdout);
+    data.print_header(fout);
+    data.read_event();
+    data.print_event(fout);
 
     fclose(fdata);
+    fclose(fout);
 }

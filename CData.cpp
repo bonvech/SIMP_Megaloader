@@ -1,24 +1,37 @@
 extern const int Debug;
+const int Chans = 12;
+const int Times = 1024;
+
+struct STime
+{
+    unsigned int hh, mm, ss, mls, mks, dns;
+    char stime[50] = "";
+};
+
 
 class CData
 {
-    FILE * fdata;
+    FILE *fdata;
     unsigned int id, size, requests, trigger, reserve;
     unsigned char buf[8] = {0};
-    struct STime
-    {
-        unsigned int dns, mks, mls, ss, mm, hh;
-        char stime[50] = "";
-    } etime;
+    STime etime;
+    int chans = Chans;
+    int times = Times;
+    unsigned int event[Chans][Times];
+    unsigned int baseline = 2048;
+
 
 public:
     CData(FILE *fin)
     {
         fdata = fin;
+        for(int chan = 0; chan < chans; chan++)
+            for(int t = 0; t < times; t++)
+                event[chan][t] = 0;
     }
     void read_header();
     void print_header(FILE *fout);
-    void get_event();
+    int  read_event();
     void print_event(FILE *fout);
 
 private:
@@ -28,11 +41,12 @@ private:
     void buf_to_time();
     void time_to_str();
     void read_time();
+    void check_event();
 };
 
 
 //====================================================================
-/// read datafile header
+/// read datafile header - 24 bytes
 void CData::read_header()
 {
     // read identificator == 3032
@@ -65,12 +79,49 @@ void CData::print_header(FILE *fout)
 }
 
 
-void CData::get_event()
-{}
+/// count event length
+void CData::check_event()
+{
+    int counter = 0;
+    unsigned int readbyte = 0;
+
+    while(readbyte != 0xffffffff)
+    {
+        readbyte = read_4_bytes();
+        counter += 4;
+    }
+    printf("\nOne event is %d bytes long.\n", counter);
+}
+
+
+int CData::read_event()
+{
+    for(int chan = 0; chan < chans; chan++)
+        for(int t = 0; t < times; t++)
+        {
+            event[chan][t] = (read_2_bytes() & 0xfff) - baseline;
+        }
+
+    if(read_4_bytes() == 0xffffffff)
+    {
+        if(Debug) printf("Event read OK!\n");
+        return 0; // OK
+    }
+    return 1; // error
+}
 
 
 void CData::print_event(FILE *fout)
-{}
+{
+    for(int chan = 0; chan < 12; chan++)
+    {
+        for(int t = 0; t <1024; t++)
+        {
+            fprintf(fout, "%d ", event[chan][t]);
+        }
+        fprintf(fout, "\n");
+    }
+}
 
 
 unsigned int CData::read_2_bytes()
@@ -92,22 +143,20 @@ unsigned int CData::read_4_bytes()
 
 void CData::read_8_bytes_to_buf()
 {
-    int i;
-
     Conv.tInt = read_4_bytes();
     if(Debug) printf("int1: %x ", Conv.tInt);
-    for(i = 0; i < 4; i++)
+    for(int i = 0; i < 4; i++)
         buf[i] = Conv.tChar[i];
     Conv.tInt = read_4_bytes();
     if(Debug) printf("int2: %x = ", Conv.tInt);
-    for(i = 0; i < 4; i++)
+    for(int i = 0; i < 4; i++)
         buf[i + 4] = Conv.tChar[i];
 
     if(Debug)
     {
         // printf buffer:
         printf("buffer:  ");
-        for(i = 0; i < 8; i++)
+        for(int i = 0; i < 8; i++)
             printf("0x%x ", buf[i]);
         printf("\n");
     }
