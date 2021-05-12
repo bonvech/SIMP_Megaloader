@@ -8,6 +8,17 @@ struct STime
     char stime[50] = "";
 };
 
+/// struct to hold package header
+struct SHeader
+{
+    unsigned int id, 
+                 size, 
+                 requests, 
+                 trigger, 
+                 reserve;
+    STime etime;
+};
+
 
 class CData
 {
@@ -15,6 +26,7 @@ class CData
     unsigned int id, size, requests, trigger, reserve;
     unsigned char buf[8] = {0};
     STime etime;
+    SHeader one, two;
     int chans = Chans;
     int times = Times;
     unsigned int event[Chans][Times];
@@ -62,8 +74,10 @@ int CData::read_header()
     read_time();
     // read reserve
     reserve = read_4_bytes();
+    
     return 0;
 }
+
 
 void CData::print_header(FILE *fout)
 {
@@ -93,8 +107,6 @@ void CData::check_event()
     }
     printf("\nOne event is %d bytes long.\n", counter);
 }
-
-
 
 
 int CData::read_event()
