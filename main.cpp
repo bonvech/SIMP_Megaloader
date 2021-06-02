@@ -16,9 +16,14 @@ int main()
 {
     FILE *fdata;
     FILE *fout;
-    char name[200] = "./data/SIPMZynq_v1_192.168.1.200.bin";
+    //char name[200] = "./data/SIPMZynq_v1_192.168.1.200.bin";
+    char name[200] = "02061001.001";
     char nameout[200] = "SIPMZynq_v1_192.168.1.200.txt";
     //unsigned int  inw;
+
+    strcpy(nameout, name);
+    strcat(nameout, ".txt");
+
 
     if((fdata = fopen(name, "rb")) == NULL)
     {
