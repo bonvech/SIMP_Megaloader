@@ -1,0 +1,54 @@
+
+================================================================================
+
+   Program Start:  02-06-2021  13:43:04.851
+
+Configuration of SIPM:
+
+SIPM#01   IP:192.168.1.200
+  Coin=1  WinCoin=20
+      TH_L   TH_H   Offset   Lengt   Smooth   Matrix
+  0    100    110        0    2046       8    0x1
+  1    100    110        0    2046       8    0x2
+  2    100    110        0    2046       8    0x4
+  3    100    110        0    2046       8    0x8
+  4    100    110        0    2046       8    0x10
+  5    100    110        0    2046       8    0x20
+  6    100    110        0    2046       8    0x40
+  7    100    110        0    2046       8    0x80
+  8    100    110        0    2046       8    0x100
+  9    100    110        0    2046       8    0x200
+ 10    100    110        0    2046       8    0x400
+ 11    100    110        0    2046       8    0x800
+SIPM #   1 ::   Frequence=0x0
+
+
+Portion=2          Computer Time:  13:45:25,149
+Station # 01 ::   Current Time::  00:11:58,554.249.790
+
+Station # 01 ::   Count Rate = 0.00 Hz
+
+SIPM #   1 ::   Frequence=0x0
+
+
+Portion=3          Computer Time:  13:47:25,253
+Station # 01 ::   Current Time::  00:13:58,653.584.020
+
+Station # 01 ::   Count Rate = 0.00 Hz
+
+SIPM #   1 ::   Frequence=0x0
+
+
+Portion=4          Computer Time:  13:49:25,356
+Station # 01 ::   Current Time::  00:15:58,752.755.600
+
+Station # 01 ::   Count Rate = 0.00 Hz
+
+SIPM #   1 ::   Frequence=0x0
+
+
+Portion=5          Computer Time:  13:51:25,460
+Station # 01 ::   Current Time::  00:17:58,852.586.330
+
+Station # 01 ::   Count Rate = 0.00 Hz
+
